@@ -10,6 +10,10 @@ const geoCheck = ()=>{if("geolocation" in navigator){
 		alt.textContent = pos.coords.altitude===null?"No altitude system support" : pos.coords.altitude;
 		speed.textContent = pos.coords.speed===null?"No speed system support" : pos.coords.speed;
 	});
+	setTimeout(()=>{
+		geoCheck();
+		console.log("update");
+	},200)
 }
 else{
 	console.log("use IP approximation");
