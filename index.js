@@ -1,29 +1,27 @@
-const lat = document.getElementById("latitude");
-const long = document.getElementById("longitude");
+const latEle = document.getElementById("latitude");
+const longEle = document.getElementById("longitude");
 const alt = document.getElementById("altitude");
 const speed = document.getElementById("speed");
-let map = L.map("map").setView([12.9625157, 77.648909], 13);
-let marker = L.marker([12.9625157, 77.648909]).addTo(map);
-let popup = L.popup();
-L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 19,
-  attribution:
-    '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-}).addTo(map);
-
-const mapClick = (e) => {
-  popup
-    .setLatLng(e.latlng)
-    .setContent("You clicked on the map at : " + e.latlng.toString())
-    .openOn(map);
+L.mapquest.key = "8AxABooymOTsfd0jaIAP2zjVQUoTFPhb";
+const latlng = {
+  lat: null,
+  lng: null,
 };
-map.on("click", mapClick);
 
-const geoCheck = () => {
+let map = L.mapquest.map("map", {
+  center: [71, 19],
+  layers: L.mapquest.tileLayer("map"),
+  zoom: 12,
+});
+let popup = L.popup();
+
+const initMap = () => {
   if ("geolocation" in navigator) {
     navigator.geolocation.getCurrentPosition((pos) => {
-      lat.textContent = pos.coords.latitude.toFixed(2);
-      long.textContent = pos.coords.longitude.toFixed(2);
+      latlng.lat = pos.coords.latitude;
+      latlng.lng = pos.coords.longitude;
+      latEle.textContent = pos.coords.latitude.toFixed(2);
+      longEle.textContent = pos.coords.longitude.toFixed(2);
       alt.textContent =
         pos.coords.altitude === null
           ? "Not available"
@@ -32,17 +30,22 @@ const geoCheck = () => {
         pos.coords.speed === null
           ? "Not available"
           : pos.coords.speed.toFixed(2);
+      map.setView(latlng);
+      L.marker(latlng, {
+        icon: L.mapquest.icons.marker(),
+        draggable: false,
+      }).addTo(map);
     });
-    setTimeout(() => {
-      geoCheck();
-      console.log("update");
-    }, 200);
   } else {
     console.log("use IP approximation");
   }
-  map.setView([pos.coords.latitude, pos.coords.longitude], 13);
-  marker = L.marker([12.9625157, 77.648909], {
-    color: "red",
-  }).addTo(map);
 };
-geoCheck();
+
+const mapClick = (e) => {
+  popup.setLatLng(e.latlng);
+  popup.setContent(`You have clicked the map at:${e.latlng}`);
+  popup.openOn(map);
+};
+
+window.addEventListener("load", initMap);
+map.on("click", mapClick);
